@@ -124,7 +124,7 @@
       <div style="overflow-x:auto">
         <table>
           <thead><tr>
-            <th>Student</th><th>Type</th><th>Streak</th>
+            <th>Name</th><th>Student</th><th>Type</th><th>Streak</th>
             <th>✍️ Kanji</th><th>🎧 Kiku</th><th>📖 Yomu</th>
             <th>Vocab</th><th>Joined</th><th>Last Active</th>
           </tr></thead>
@@ -257,7 +257,7 @@ function render() {
   renderStudentPage();
   document.getElementById('studentSearch').oninput = function() {
     const q = this.value.toLowerCase();
-    filteredStudents = students.filter(s => (s.email||'').toLowerCase().includes(q) || s.id.includes(q));
+    filteredStudents = students.filter(s => (s.email||'').toLowerCase().includes(q) || (s.display_name||'').toLowerCase().includes(q) || s.id.includes(q));
     studentPage = 0;
     renderStudentPage();
   };
@@ -327,6 +327,7 @@ function renderStudentPage() {
   }
 
   document.getElementById('studentTable').innerHTML = page.map(s => `<tr>
+    <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.display_name || '—'}</td>
     <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shortEmail(s.email)}</td>
     <td>
       ${s.is_pro ? '<span class="badge badge-pro">Pro</span>' : '<span class="badge badge-free">Free</span>'}
