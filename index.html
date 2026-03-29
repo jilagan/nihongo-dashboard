@@ -115,6 +115,12 @@
   <div class="tab-content" id="tab-students">
     <div class="card">
       <h2>Student Roster <span>sorted by last activity</span></h2>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <input id="studentSearch" type="text" placeholder="Search students…" style="flex:1;padding:8px 12px;border:1px solid #e5e5ea;border-radius:8px;font-size:13px;outline:none;">
+        <div id="studentPager" style="font-size:12px;color:#86868b;white-space:nowrap;"></div>
+        <button onclick="prevStudentPage()" style="padding:4px 10px;border:1px solid #e5e5ea;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;">&lsaquo;</button>
+        <button onclick="nextStudentPage()" style="padding:4px 10px;border:1px solid #e5e5ea;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;">&rsaquo;</button>
+      </div>
       <div style="overflow-x:auto">
         <table>
           <thead><tr>
@@ -168,6 +174,9 @@
 <script>
 const API = 'https://fltusorahxjvsdjaspgy.supabase.co/functions/v1/nihongo-dashboard';
 let DATA = null;
+const PAGE_SIZE = 15;
+let studentPage = 0;
+let filteredStudents = [];
 
 // Tabs
 document.querySelectorAll('.tab').forEach(t => {
@@ -242,24 +251,16 @@ function render() {
     statCard('Vocab Mastered', o.total_vocab_mastered, 'cross-app', 'orange'),
   ].join('');
 
-  // Student roster
-  const tbody = document.getElementById('studentTable');
-  if (students.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">No students yet</td></tr>';
-  } else {
-    tbody.innerHTML = students.map(s => `<tr>
-      <td><strong>${shortEmail(s.email)}</strong></td>
-      <td>${s.provider === 'apple' ? '<span class="badge badge-apple">Apple</span>' : '<span class="badge badge-anon">Anon</span>'}
-          ${s.is_pro ? ' <span class="badge badge-pro">PRO</span>' : ''}</td>
-      <td>${s.streak > 0 ? '🔥 ' + s.streak : '—'}</td>
-      <td>${s.kanji.practiced > 0 ? s.kanji.practiced + (s.kanji.mastered > 0 ? ' <span style="color:#86868b">('+s.kanji.mastered+' mastered)</span>' : '') : '—'}</td>
-      <td>${s.kiku.passages > 0 ? s.kiku.passages + ' passages' : '—'}</td>
-      <td>${s.yomu.passages > 0 ? s.yomu.passages + ' passages' : '—'}</td>
-      <td>${s.vocab_mastered > 0 ? s.vocab_mastered : '—'}</td>
-      <td style="color:#86868b">${relDate(s.joined)}</td>
-      <td>${relDate(s.last_active)}</td>
-    </tr>`).join('');
-  }
+  // Student roster — paginated
+  filteredStudents = students;
+  studentPage = 0;
+  renderStudentPage();
+  document.getElementById('studentSearch').oninput = function() {
+    const q = this.value.toLowerCase();
+    filteredStudents = students.filter(s => (s.email||'').toLowerCase().includes(q) || s.id.includes(q));
+    studentPage = 0;
+    renderStudentPage();
+  };
 
   // Kanji tab
   const kanjiStudents = students.filter(s => s.kanji.practiced > 0);
@@ -310,6 +311,44 @@ function render() {
 
 function statCard(label, value, sub, color) {
   return `<div class="stat-card"><div class="lbl">${label}</div><div class="val ${color}">${value}</div><div class="sub">${sub}</div></div>`;
+}
+
+function renderStudentPage() {
+  const total = filteredStudents.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const start = studentPage * PAGE_SIZE;
+  const page = filteredStudents.slice(start, start + PAGE_SIZE);
+
+  const pager = document.getElementById('studentPager');
+  if (total === 0) {
+    pager.textContent = 'No results';
+  } else {
+    pager.textContent = `${start + 1}–${Math.min(start + PAGE_SIZE, total)} of ${total}`;
+  }
+
+  document.getElementById('studentTable').innerHTML = page.map(s => `<tr>
+    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shortEmail(s.email)}</td>
+    <td>
+      ${s.is_pro ? '<span class="badge badge-pro">Pro</span>' : '<span class="badge badge-free">Free</span>'}
+      ${s.provider === 'apple' ? ' <span class="badge badge-apple">Apple</span>' : ''}
+    </td>
+    <td>${s.streak > 0 ? '🔥 ' + s.streak : '—'}</td>
+    <td>${s.kanji.practiced > 0 ? s.kanji.practiced + ' / ' + s.kanji.mastered + '✓' : '—'}</td>
+    <td>${s.kiku.passages > 0 ? s.kiku.passages + (s.kiku.quiz_avg != null ? ' · ' + s.kiku.quiz_avg + '%' : '') : '—'}</td>
+    <td>${s.yomu.passages > 0 ? s.yomu.passages + (s.yomu.quiz_avg != null ? ' · ' + s.yomu.quiz_avg + '%' : '') : '—'}</td>
+    <td>${s.vocab_mastered > 0 ? s.vocab_mastered : '—'}</td>
+    <td>${relDate(s.joined)}</td>
+    <td>${relDate(s.last_active)}</td>
+  </tr>`).join('') || '<tr><td colspan="9" class="empty">No students found</td></tr>';
+}
+
+function prevStudentPage() {
+  if (studentPage > 0) { studentPage--; renderStudentPage(); }
+}
+
+function nextStudentPage() {
+  const totalPages = Math.ceil(filteredStudents.length / PAGE_SIZE);
+  if (studentPage < totalPages - 1) { studentPage++; renderStudentPage(); }
 }
 
 showLogin();
