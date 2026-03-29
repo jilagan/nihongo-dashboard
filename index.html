@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nihongo Mentor &mdash; Teacher Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f7; color: #1d1d1f; }
+  header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 20px 32px; display: flex; align-items: center; gap: 16px; }
+  .logo { font-size: 32px; }
+  header h1 { font-size: 20px; font-weight: 700; color: #fff; }
+  header p { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 2px; }
+  #updated { font-size: 11px; color: rgba(255,255,255,.5); margin-left: auto; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #34c759; margin-right: 5px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; margin-bottom: 24px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .tab { flex: 1; padding: 14px 16px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all .2s; color: #86868b; }
+  .tab:hover { background: #f9f9fb; color: #1d1d1f; }
+  .tab.active { color: #0f3460; border-bottom-color: #0f3460; background: #fff; }
+  .tab .emoji { font-size: 18px; display: block; margin-bottom: 4px; }
+
+  /* Stats */
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #86868b; margin: 24px 0 12px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .stat-card { background: #fff; border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .stat-card .lbl { font-size: 11px; color: #86868b; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+  .stat-card .val { font-size: 34px; font-weight: 700; margin: 5px 0 2px; }
+  .stat-card .sub { font-size: 11px; color: #86868b; }
+  .red{color:#ff3b30} .green{color:#34c759} .blue{color:#007aff} .orange{color:#ff9500} .purple{color:#5856d6} .teal{color:#009688} .indigo{color:#5856d6} .navy{color:#0f3460}
+
+  /* Cards & Tables */
+  .card { background:#fff; border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06); margin-bottom: 20px; }
+  .card h2 { font-size:14px; font-weight:600; margin-bottom:14px; }
+  .card h2 span { font-size:11px; color:#86868b; font-weight:400; margin-left:5px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; font-size:10px; font-weight:600; color:#86868b; text-transform:uppercase; letter-spacing:.4px; padding:0 8px 8px 0; border-bottom:1px solid #f2f2f7; white-space: nowrap; }
+  td { padding:9px 8px 9px 0; border-bottom:1px solid #f2f2f7; vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background: #f9f9fb; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+  .badge-pro { background: #5856d6; color: #fff; }
+  .badge-free { background: #f2f2f7; color: #86868b; }
+  .badge-apple { background: #1d1d1f; color: #fff; }
+  .badge-anon { background: #f2f2f7; color: #86868b; }
+
+  /* Tab content */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Login */
+  #login-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:999; }
+  #login-box { background:#fff; border-radius:18px; padding:36px 32px 28px; width:360px; box-shadow:0 12px 40px rgba(0,0,0,.2); text-align:center; }
+  #login-box h2 { font-size:18px; margin-bottom:4px; }
+  #login-box p { font-size:12px; color:#86868b; margin-bottom:20px; }
+  #login-box input { width:100%; padding:10px 14px; border:1px solid #e5e5ea; border-radius:8px; font-size:14px; margin-bottom:10px; outline:none; }
+  #login-box input:focus { border-color:#0f3460; }
+  #login-box button { width:100%; padding:10px; background: linear-gradient(135deg, #1a1a2e, #0f3460); color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+  #login-box button:hover { opacity:.9; }
+  #login-err { color:#ff3b30; font-size:12px; margin-top:8px; display:none; }
+
+  .empty { color: #c7c7cc; font-style: italic; text-align: center; padding: 40px; }
+
+  @media(max-width:700px){
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    header { padding: 16px; }
+    .tabs { flex-wrap: wrap; }
+    .tab { flex: none; width: 50%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-overlay">
+  <div id="login-box">
+    <div style="font-size:40px;margin-bottom:8px;">🇯🇵</div>
+    <h2>Nihongo Mentor</h2>
+    <p>Teacher Dashboard — enter credentials</p>
+    <input id="login-pass" type="password" placeholder="Password" autofocus>
+    <button id="login-btn">Sign In</button>
+    <div id="login-err">Invalid password. Try again.</div>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="logo">🇯🇵</div>
+  <div>
+    <h1>Nihongo Mentor</h1>
+    <p>Teacher Dashboard</p>
+  </div>
+  <div id="updated"><span class="dot"></span>Loading&hellip;</div>
+</header>
+
+<div class="container">
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="overview"><span class="emoji">📊</span>Overview</div>
+    <div class="tab" data-tab="students"><span class="emoji">👥</span>Students</div>
+    <div class="tab" data-tab="kanji"><span class="emoji">✍️</span>Kanji</div>
+    <div class="tab" data-tab="kiku"><span class="emoji">🎧</span>Kiku</div>
+    <div class="tab" data-tab="yomu"><span class="emoji">📖</span>Yomu</div>
+  </div>
+
+  <!-- Overview Tab -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="stats-grid" id="overviewStats"></div>
+  </div>
+
+  <!-- Students Tab -->
+  <div class="tab-content" id="tab-students">
+    <div class="card">
+      <h2>Student Roster <span>sorted by last activity</span></h2>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>Student</th><th>Type</th><th>Streak</th>
+            <th>✍️ Kanji</th><th>🎧 Kiku</th><th>📖 Yomu</th>
+            <th>Vocab</th><th>Joined</th><th>Last Active</th>
+          </tr></thead>
+          <tbody id="studentTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kanji Tab -->
+  <div class="tab-content" id="tab-kanji">
+    <div class="stats-grid" id="kanjiStats"></div>
+    <div class="card">
+      <h2>Kanji Practice by Student</h2>
+      <table>
+        <thead><tr><th>Student</th><th>Practiced</th><th>Mastered</th><th>Mastery %</th><th>Last Practice</th></tr></thead>
+        <tbody id="kanjiTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Kiku Tab -->
+  <div class="tab-content" id="tab-kiku">
+    <div class="stats-grid" id="kikuStats"></div>
+    <div class="card">
+      <h2>Listening Progress by Student</h2>
+      <table>
+        <thead><tr><th>Student</th><th>Passages</th><th>Quiz Avg</th><th>SRS Cards</th><th>Last Listen</th></tr></thead>
+        <tbody id="kikuTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Yomu Tab -->
+  <div class="tab-content" id="tab-yomu">
+    <div class="stats-grid" id="yomuStats"></div>
+    <div class="card">
+      <h2>Reading Progress by Student</h2>
+      <table>
+        <thead><tr><th>Student</th><th>Passages</th><th>Read Time</th><th>Lookups</th><th>Quiz Avg</th><th>SRS Cards</th></tr></thead>
+        <tbody id="yomuTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://fltusorahxjvsdjaspgy.supabase.co/functions/v1/nihongo-dashboard';
+let DATA = null;
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+// Login
+function showLogin() {
+  document.getElementById('login-overlay').style.display = 'flex';
+  const inp = document.getElementById('login-pass');
+  const btn = document.getElementById('login-btn');
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  newBtn.addEventListener('click', () => { localStorage.setItem('nd_pass', inp.value); load(); });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') newBtn.click(); });
+  const saved = localStorage.getItem('nd_pass');
+  if (saved) { inp.value = saved; newBtn.click(); }
+}
+
+function shortEmail(e) {
+  if (!e || e === 'anonymous') return '(anonymous)';
+  if (e.includes('@privaterelay')) return e.split('@')[0].slice(0, 6) + '…@iCloud';
+  return e;
+}
+
+function relDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = Math.floor((now - d) / 86400000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Yesterday';
+  if (diff < 7) return diff + 'd ago';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+async function load() {
+  const pass = localStorage.getItem('nd_pass') || '';
+  try {
+    const res = await fetch(API, { headers: { 'x-dashboard-password': pass } });
+    if (res.status === 401) {
+      document.getElementById('login-err').style.display = 'block';
+      localStorage.removeItem('nd_pass');
+      showLogin();
+      return;
+    }
+    document.getElementById('login-overlay').style.display = 'none';
+    DATA = await res.json();
+    render();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function render() {
+  const o = DATA.overview;
+  const students = DATA.students;
+  document.getElementById('updated').innerHTML = '<span class="dot"></span>Updated ' + new Date(DATA.updated_at).toLocaleTimeString();
+
+  // Overview stats
+  document.getElementById('overviewStats').innerHTML = [
+    statCard('Total Users', o.total_users, 'across all apps', 'navy'),
+    statCard('Active (7d)', o.active_users_7d, Math.round(o.active_users_7d/Math.max(o.total_users,1)*100)+'% of total', 'green'),
+    statCard('Kanji Practiced', o.total_kanji_practiced, 'SRS cards created', 'red'),
+    statCard('Kiku Passages', o.total_kiku_passages, 'listened', 'indigo'),
+    statCard('Yomu Passages', o.total_yomu_passages, 'read', 'teal'),
+    statCard('Vocab Mastered', o.total_vocab_mastered, 'cross-app', 'orange'),
+  ].join('');
+
+  // Student roster
+  const tbody = document.getElementById('studentTable');
+  if (students.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">No students yet</td></tr>';
+  } else {
+    tbody.innerHTML = students.map(s => `<tr>
+      <td><strong>${shortEmail(s.email)}</strong></td>
+      <td>${s.provider === 'apple' ? '<span class="badge badge-apple">Apple</span>' : '<span class="badge badge-anon">Anon</span>'}
+          ${s.is_pro ? ' <span class="badge badge-pro">PRO</span>' : ''}</td>
+      <td>${s.streak > 0 ? '🔥 ' + s.streak : '—'}</td>
+      <td>${s.kanji.practiced > 0 ? s.kanji.practiced + (s.kanji.mastered > 0 ? ' <span style="color:#86868b">('+s.kanji.mastered+' mastered)</span>' : '') : '—'}</td>
+      <td>${s.kiku.passages > 0 ? s.kiku.passages + ' passages' : '—'}</td>
+      <td>${s.yomu.passages > 0 ? s.yomu.passages + ' passages' : '—'}</td>
+      <td>${s.vocab_mastered > 0 ? s.vocab_mastered : '—'}</td>
+      <td style="color:#86868b">${relDate(s.joined)}</td>
+      <td>${relDate(s.last_active)}</td>
+    </tr>`).join('');
+  }
+
+  // Kanji tab
+  const kanjiStudents = students.filter(s => s.kanji.practiced > 0);
+  document.getElementById('kanjiStats').innerHTML = [
+    statCard('Students', kanjiStudents.length, 'using Kanji Mentor', 'red'),
+    statCard('Total Cards', o.total_kanji_practiced, 'SRS entries', 'red'),
+    statCard('Avg per Student', kanjiStudents.length ? Math.round(o.total_kanji_practiced/kanjiStudents.length) : 0, 'kanji', 'red'),
+  ].join('');
+  document.getElementById('kanjiTable').innerHTML = kanjiStudents.map(s => `<tr>
+    <td>${shortEmail(s.email)}</td>
+    <td>${s.kanji.practiced}</td>
+    <td>${s.kanji.mastered}</td>
+    <td>${s.kanji.practiced > 0 ? Math.round(s.kanji.mastered/s.kanji.practiced*100)+'%' : '—'}</td>
+    <td>${relDate(s.last_active)}</td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty">No kanji practice yet</td></tr>';
+
+  // Kiku tab
+  const kikuStudents = students.filter(s => s.kiku.passages > 0);
+  document.getElementById('kikuStats').innerHTML = [
+    statCard('Students', kikuStudents.length, 'using Kiku Mentor', 'indigo'),
+    statCard('Passages Heard', o.total_kiku_passages, 'total', 'indigo'),
+    statCard('SRS Cards', students.reduce((a,s)=>a+s.kiku.srs_cards,0), 'listening vocab', 'indigo'),
+  ].join('');
+  document.getElementById('kikuTable').innerHTML = kikuStudents.map(s => `<tr>
+    <td>${shortEmail(s.email)}</td>
+    <td>${s.kiku.passages}</td>
+    <td>${s.kiku.quiz_avg != null ? s.kiku.quiz_avg+'%' : '—'}</td>
+    <td>${s.kiku.srs_cards}</td>
+    <td>${relDate(s.last_active)}</td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty">No listening activity yet</td></tr>';
+
+  // Yomu tab
+  const yomuStudents = students.filter(s => s.yomu.passages > 0);
+  document.getElementById('yomuStats').innerHTML = [
+    statCard('Students', yomuStudents.length, 'using Yomu Mentor', 'teal'),
+    statCard('Passages Read', o.total_yomu_passages, 'total', 'teal'),
+    statCard('Reading Time', students.reduce((a,s)=>a+s.yomu.reading_time_min,0)+'m', 'total', 'teal'),
+  ].join('');
+  document.getElementById('yomuTable').innerHTML = yomuStudents.map(s => `<tr>
+    <td>${shortEmail(s.email)}</td>
+    <td>${s.yomu.passages}</td>
+    <td>${s.yomu.reading_time_min}m</td>
+    <td>${s.yomu.word_lookups}</td>
+    <td>${s.yomu.quiz_avg != null ? s.yomu.quiz_avg+'%' : '—'}</td>
+    <td>${s.yomu.srs_cards}</td>
+  </tr>`).join('') || '<tr><td colspan="6" class="empty">No reading activity yet</td></tr>';
+}
+
+function statCard(label, value, sub, color) {
+  return `<div class="stat-card"><div class="lbl">${label}</div><div class="val ${color}">${value}</div><div class="sub">${sub}</div></div>`;
+}
+
+showLogin();
+</script>
+</body>
+</html>
