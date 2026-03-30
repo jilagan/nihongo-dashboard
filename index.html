@@ -190,6 +190,8 @@
           <thead><tr>
             <th onclick="sortRoster('display_name')">Name <span class="sort-arrow">↕</span></th>
             <th onclick="sortRoster('email')">Student <span class="sort-arrow">↕</span></th>
+            <th onclick="sortRoster('country_code')">Country <span class="sort-arrow">↕</span></th>
+            <th onclick="sortRoster('device_model')">Device <span class="sort-arrow">↕</span></th>
             <th>Status</th>
             <th onclick="sortRoster('engScore')">Engagement <span class="sort-arrow">↕</span></th>
             <th onclick="sortRoster('streak')">Streak <span class="sort-arrow">↕</span></th>
@@ -353,6 +355,19 @@ function miniBar(value, max, color) {
   return `<div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%;background:${color}"></div></div>`;
 }
 
+function countryFlag(code) {
+  if (!code) return '<span style="color:#c7c7cc">—</span>';
+  // Convert ISO 3166-1 alpha-2 to flag emoji via regional indicator symbols
+  const flag = [...code.toUpperCase()].map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('');
+  return `<span title="${code}">${flag} ${code}</span>`;
+}
+
+function deviceIcon(model) {
+  if (!model) return '<span style="color:#c7c7cc">—</span>';
+  if (model === 'iPad') return '📱 iPad';
+  return '📱 iPhone';
+}
+
 function quizBadge(avg) {
   if (avg == null) return '<span style="color:#c7c7cc">—</span>';
   const color = avg >= 75 ? '#1a7a40' : avg >= 50 ? '#a05a00' : '#c0392b';
@@ -393,6 +408,8 @@ function enrichStudents(students) {
     kanjiPracticed: s.kanji.practiced,
     kikuPassages: s.kiku.passages,
     yomuPassages: s.yomu.passages,
+    country_code: s.country_code ?? null,
+    device_model: s.device_model ?? null,
   }));
 }
 
@@ -555,6 +572,8 @@ function renderStudentPage() {
     return `<tr${rowClass}>
       <td style="max-width:160px">${nameDisplay}</td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:#86868b">${s.is_pro ? '<span class="badge badge-pro" style="margin-right:4px">Pro</span>' : ''}${s.provider === 'apple' ? '<span class="badge badge-apple">Apple</span>' : ''}</td>
+      <td style="white-space:nowrap;font-size:13px">${countryFlag(s.country_code)}</td>
+      <td style="white-space:nowrap;font-size:12px;color:#555">${deviceIcon(s.device_model)}</td>
       <td>${statusBadge(s.status)}</td>
       <td style="text-align:center">${engScoreRing(s.engScore)}</td>
       <td>${s.streak > 0 ? '<span style="color:#ff9500;font-weight:600">🔥 ' + s.streak + '</span>' : '<span style="color:#c7c7cc">—</span>'}</td>
@@ -576,7 +595,7 @@ function renderStudentPage() {
       <td>${s.vocab_mastered > 0 ? '<span style="font-weight:600">' + s.vocab_mastered + '</span>' : '<span style="color:#c7c7cc">—</span>'}</td>
       <td>${lastActiveCell(s.last_active)}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="10" class="empty">No students match this filter</td></tr>';
+  }).join('') || '<tr><td colspan="12" class="empty">No students match this filter</td></tr>';
 }
 
 function prevStudentPage() {
@@ -588,10 +607,12 @@ function nextStudentPage() {
 }
 
 function exportCSV() {
-  const headers = ['Name','Email','Status','Engagement Score','Streak','Kanji Practiced','Kanji Mastered','Kiku Passages','Kiku Quiz Avg','Yomu Passages','Yomu Quiz Avg','Vocab Mastered','Joined','Last Active'];
+  const headers = ['Name','Email','Country','Device','Status','Engagement Score','Streak','Kanji Practiced','Kanji Mastered','Kiku Passages','Kiku Quiz Avg','Yomu Passages','Yomu Quiz Avg','Vocab Mastered','Joined','Last Active'];
   const rows = allEnrichedStudents.map(s => [
     s.display_name || '',
     s.email || '',
+    s.country_code || '',
+    s.device_model || '',
     s.status,
     s.engScore,
     s.streak,
