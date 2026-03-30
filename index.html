@@ -14,7 +14,7 @@
   #updated { font-size: 11px; color: rgba(255,255,255,.5); margin-left: auto; }
   .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #34c759; margin-right: 5px; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-  .container { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 24px 20px; }
 
   /* Tabs */
   .tabs { display: flex; gap: 0; margin-bottom: 24px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
@@ -37,19 +37,52 @@
   .card h2 { font-size:14px; font-weight:600; margin-bottom:14px; }
   .card h2 span { font-size:11px; color:#86868b; font-weight:400; margin-left:5px; }
   table { width:100%; border-collapse:collapse; font-size:13px; }
-  th { text-align:left; font-size:10px; font-weight:600; color:#86868b; text-transform:uppercase; letter-spacing:.4px; padding:0 8px 8px 0; border-bottom:1px solid #f2f2f7; white-space: nowrap; }
-  td { padding:9px 8px 9px 0; border-bottom:1px solid #f2f2f7; vertical-align:middle; }
+  th { text-align:left; font-size:10px; font-weight:600; color:#86868b; text-transform:uppercase; letter-spacing:.4px; padding:0 10px 8px 0; border-bottom:1px solid #f2f2f7; white-space:nowrap; cursor:pointer; user-select:none; }
+  th:hover { color: #1d1d1f; }
+  th .sort-arrow { margin-left:3px; opacity:.4; }
+  td { padding:10px 10px 10px 0; border-bottom:1px solid #f2f2f7; vertical-align:middle; }
   tr:last-child td { border-bottom:none; }
   tr:hover td { background: #f9f9fb; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
-  .badge-pro { background: #5856d6; color: #fff; }
-  .badge-free { background: #f2f2f7; color: #86868b; }
-  .badge-apple { background: #1d1d1f; color: #fff; }
-  .badge-anon { background: #f2f2f7; color: #86868b; }
+  tr.at-risk td { background: #fff9f0; }
+  tr.inactive td { background: #fff5f5; }
 
-  /* Tab content */
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
+  /* Badges */
+  .badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600; }
+  .badge-pro { background:#5856d6; color:#fff; }
+  .badge-free { background:#f2f2f7; color:#86868b; }
+  .badge-apple { background:#1d1d1f; color:#fff; }
+  .status-active { background:#d1f7e0; color:#1a7a40; }
+  .status-risk   { background:#fff0d6; color:#a05a00; }
+  .status-inactive { background:#ffe5e5; color:#c0392b; }
+  .status-new    { background:#e8f4fd; color:#1a5276; }
+
+  /* Progress bar */
+  .mini-bar { height:5px; border-radius:3px; background:#f2f2f7; overflow:hidden; margin-top:3px; width:80px; }
+  .mini-bar-fill { height:100%; border-radius:3px; transition: width .4s; }
+
+  /* Engagement score ring */
+  .eng-score { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; font-size:11px; font-weight:700; border:2px solid; }
+
+  /* Toolbar */
+  .roster-toolbar { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .roster-toolbar input { flex:1; min-width:160px; padding:8px 12px; border:1px solid #e5e5ea; border-radius:8px; font-size:13px; outline:none; }
+  .roster-toolbar input:focus { border-color:#0f3460; }
+  .btn { padding:7px 14px; border:1px solid #e5e5ea; border-radius:8px; background:#fff; cursor:pointer; font-size:12px; font-weight:600; color:#1d1d1f; transition:all .15s; }
+  .btn:hover { background:#f2f2f7; }
+  .btn-export { background:#0f3460; color:#fff; border-color:#0f3460; }
+  .btn-export:hover { background:#16213e; }
+  #studentPager { font-size:12px; color:#86868b; white-space:nowrap; }
+
+  /* Filter pills */
+  .filter-pills { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+  .pill { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; border:1.5px solid #e5e5ea; background:#fff; color:#86868b; transition:all .15s; }
+  .pill.active { border-color:#0f3460; background:#0f3460; color:#fff; }
+
+  /* Attention panel */
+  .attention-banner { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; background:#fff9f0; border:1px solid #ffe0a3; border-radius:12px; margin-bottom:16px; }
+  .attention-banner .icon { font-size:20px; flex-shrink:0; margin-top:1px; }
+  .attention-banner p { font-size:12px; line-height:1.5; color:#7a4a00; }
+  .attention-banner strong { font-size:13px; color:#5a3000; display:block; margin-bottom:3px; }
 
   /* Login */
   #login-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:999; }
@@ -58,17 +91,18 @@
   #login-box p { font-size:12px; color:#86868b; margin-bottom:20px; }
   #login-box input { width:100%; padding:10px 14px; border:1px solid #e5e5ea; border-radius:8px; font-size:14px; margin-bottom:10px; outline:none; }
   #login-box input:focus { border-color:#0f3460; }
-  #login-box button { width:100%; padding:10px; background: linear-gradient(135deg, #1a1a2e, #0f3460); color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+  #login-box button { width:100%; padding:10px; background:linear-gradient(135deg,#1a1a2e,#0f3460); color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
   #login-box button:hover { opacity:.9; }
   #login-err { color:#ff3b30; font-size:12px; margin-top:8px; display:none; }
 
-  .empty { color: #c7c7cc; font-style: italic; text-align: center; padding: 40px; }
+  .empty { color:#c7c7cc; font-style:italic; text-align:center; padding:40px; }
 
   @media(max-width:700px){
     .stats-grid{grid-template-columns:repeat(2,1fr)}
-    header { padding: 16px; }
-    .tabs { flex-wrap: wrap; }
-    .tab { flex: none; width: 50%; }
+    header{padding:16px}
+    .tabs{flex-wrap:wrap}
+    .tab{flex:none;width:50%}
+    .roster-toolbar{flex-direction:column;align-items:stretch}
   }
 </style>
 </head>
@@ -100,7 +134,7 @@
   <!-- Tabs -->
   <div class="tabs">
     <div class="tab active" data-tab="overview"><span class="emoji">📊</span>Overview</div>
-    <div class="tab" data-tab="students"><span class="emoji">👥</span>Students</div>
+    <div class="tab" data-tab="students"><span class="emoji">👥</span>Class Roster</div>
     <div class="tab" data-tab="kanji"><span class="emoji">✍️</span>Kanji</div>
     <div class="tab" data-tab="kiku"><span class="emoji">🎧</span>Kiku</div>
     <div class="tab" data-tab="yomu"><span class="emoji">📖</span>Yomu</div>
@@ -109,24 +143,61 @@
   <!-- Overview Tab -->
   <div class="tab-content active" id="tab-overview">
     <div class="stats-grid" id="overviewStats"></div>
+    <div class="card">
+      <h2>Engagement Summary <span>last 7 days</span></h2>
+      <table>
+        <thead><tr>
+          <th>Student</th>
+          <th>Status</th>
+          <th>Streak</th>
+          <th>✍️ Kanji</th>
+          <th>🎧 Kiku</th>
+          <th>📖 Yomu</th>
+          <th>Last Active</th>
+        </tr></thead>
+        <tbody id="overviewTable"></tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- Students Tab -->
+  <!-- Students (Class Roster) Tab -->
   <div class="tab-content" id="tab-students">
+    <div id="attentionBanner"></div>
+
     <div class="card">
-      <h2>Student Roster <span>sorted by last activity</span></h2>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-        <input id="studentSearch" type="text" placeholder="Search students…" style="flex:1;padding:8px 12px;border:1px solid #e5e5ea;border-radius:8px;font-size:13px;outline:none;">
-        <div id="studentPager" style="font-size:12px;color:#86868b;white-space:nowrap;"></div>
-        <button onclick="prevStudentPage()" style="padding:4px 10px;border:1px solid #e5e5ea;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;">&lsaquo;</button>
-        <button onclick="nextStudentPage()" style="padding:4px 10px;border:1px solid #e5e5ea;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;">&rsaquo;</button>
+      <h2>Class Roster <span id="rosterCount"></span></h2>
+
+      <!-- Filter pills -->
+      <div class="filter-pills">
+        <div class="pill active" data-filter="all">All</div>
+        <div class="pill" data-filter="active">🟢 Active</div>
+        <div class="pill" data-filter="risk">🟡 At Risk</div>
+        <div class="pill" data-filter="inactive">🔴 Inactive</div>
+        <div class="pill" data-filter="new">🔵 New</div>
       </div>
+
+      <!-- Toolbar -->
+      <div class="roster-toolbar">
+        <input id="studentSearch" type="text" placeholder="Search by name or email…">
+        <div id="studentPager"></div>
+        <button class="btn" onclick="prevStudentPage()">&lsaquo; Prev</button>
+        <button class="btn" onclick="nextStudentPage()">Next &rsaquo;</button>
+        <button class="btn btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+
       <div style="overflow-x:auto">
-        <table>
+        <table id="rosterTable">
           <thead><tr>
-            <th>Name</th><th>Student</th><th>Type</th><th>Streak</th>
-            <th>✍️ Kanji</th><th>🎧 Kiku</th><th>📖 Yomu</th>
-            <th>Vocab</th><th>Joined</th><th>Last Active</th>
+            <th onclick="sortRoster('display_name')">Name <span class="sort-arrow">↕</span></th>
+            <th onclick="sortRoster('email')">Student <span class="sort-arrow">↕</span></th>
+            <th>Status</th>
+            <th onclick="sortRoster('engScore')">Engagement <span class="sort-arrow">↕</span></th>
+            <th onclick="sortRoster('streak')">Streak <span class="sort-arrow">↕</span></th>
+            <th onclick="sortRoster('kanjiPracticed')">✍️ Kanji</th>
+            <th onclick="sortRoster('kikuPassages')">🎧 Listening</th>
+            <th onclick="sortRoster('yomuPassages')">📖 Reading</th>
+            <th onclick="sortRoster('vocab_mastered')">Vocab</th>
+            <th onclick="sortRoster('last_active')">Last Active <span class="sort-arrow">↕</span></th>
           </tr></thead>
           <tbody id="studentTable"></tbody>
         </table>
@@ -140,7 +211,7 @@
     <div class="card">
       <h2>Kanji Practice by Student</h2>
       <table>
-        <thead><tr><th>Student</th><th>Practiced</th><th>Mastered</th><th>Mastery %</th><th>Last Practice</th></tr></thead>
+        <thead><tr><th>Student</th><th>Practiced</th><th>Mastered</th><th>Mastery %</th><th>Progress</th><th>Last Practice</th></tr></thead>
         <tbody id="kanjiTable"></tbody>
       </table>
     </div>
@@ -152,7 +223,7 @@
     <div class="card">
       <h2>Listening Progress by Student</h2>
       <table>
-        <thead><tr><th>Student</th><th>Passages</th><th>Quiz Avg</th><th>SRS Cards</th><th>Last Listen</th></tr></thead>
+        <thead><tr><th>Student</th><th>Passages</th><th>Comprehension</th><th>SRS Cards</th><th>Last Listen</th></tr></thead>
         <tbody id="kikuTable"></tbody>
       </table>
     </div>
@@ -164,7 +235,7 @@
     <div class="card">
       <h2>Reading Progress by Student</h2>
       <table>
-        <thead><tr><th>Student</th><th>Passages</th><th>Read Time</th><th>Lookups</th><th>Quiz Avg</th><th>SRS Cards</th></tr></thead>
+        <thead><tr><th>Student</th><th>Passages</th><th>Read Time</th><th>Word Lookups</th><th>Comprehension</th><th>SRS Cards</th></tr></thead>
         <tbody id="yomuTable"></tbody>
       </table>
     </div>
@@ -174,9 +245,13 @@
 <script>
 const API = 'https://fltusorahxjvsdjaspgy.supabase.co/functions/v1/nihongo-dashboard';
 let DATA = null;
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 20;
 let studentPage = 0;
 let filteredStudents = [];
+let allEnrichedStudents = [];
+let currentFilter = 'all';
+let sortKey = 'last_active';
+let sortAsc = false;
 
 // Tabs
 document.querySelectorAll('.tab').forEach(t => {
@@ -185,6 +260,16 @@ document.querySelectorAll('.tab').forEach(t => {
     document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     document.getElementById('tab-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+// Filter pills
+document.querySelectorAll('.pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    currentFilter = p.dataset.filter;
+    applyFilters();
   });
 });
 
@@ -218,6 +303,70 @@ function relDate(iso) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+function daysAgo(iso) {
+  if (!iso) return 999;
+  return Math.floor((new Date() - new Date(iso)) / 86400000);
+}
+
+function studentStatus(s) {
+  const days = daysAgo(s.last_active);
+  const joinedDays = daysAgo(s.joined);
+  if (joinedDays <= 2 && s.kanji.practiced === 0 && s.kiku.passages === 0 && s.yomu.passages === 0) return 'new';
+  if (days <= 2) return 'active';
+  if (days <= 6) return 'risk';
+  return 'inactive';
+}
+
+function statusBadge(status) {
+  const map = {
+    active:   ['status-active',   '🟢 Active'],
+    risk:     ['status-risk',     '🟡 At Risk'],
+    inactive: ['status-inactive', '🔴 Inactive'],
+    new:      ['status-new',      '🔵 New'],
+  };
+  const [cls, label] = map[status] || map.inactive;
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+// Engagement score: 0–100 composite
+// Streak (max 30pts) + kanji mastered (max 20pts) + kiku passages*comprehension (max 25pts) + yomu passages*comprehension (max 25pts)
+function engagementScore(s) {
+  const streakPts  = Math.min(s.streak, 14) / 14 * 30;
+  const kanjiPts   = Math.min(s.kanji.mastered, 30) / 30 * 20;
+  const kikuPts    = Math.min(s.kiku.passages, 10) / 10 * 12.5
+                   + (s.kiku.quiz_avg != null ? s.kiku.quiz_avg / 100 * 12.5 : 0);
+  const yomuPts    = Math.min(s.yomu.passages, 10) / 10 * 12.5
+                   + (s.yomu.quiz_avg != null ? s.yomu.quiz_avg / 100 * 12.5 : 0);
+  return Math.round(streakPts + kanjiPts + kikuPts + yomuPts);
+}
+
+function engScoreRing(score) {
+  let color, bg;
+  if (score >= 70)      { color = '#1a7a40'; bg = '#d1f7e0'; }
+  else if (score >= 40) { color = '#a05a00'; bg = '#fff0d6'; }
+  else                  { color = '#c0392b'; bg = '#ffe5e5'; }
+  return `<span class="eng-score" style="color:${color};background:${bg};border-color:${color}">${score}</span>`;
+}
+
+function miniBar(value, max, color) {
+  const pct = Math.min(100, Math.round(value / Math.max(max, 1) * 100));
+  return `<div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%;background:${color}"></div></div>`;
+}
+
+function quizBadge(avg) {
+  if (avg == null) return '<span style="color:#c7c7cc">—</span>';
+  const color = avg >= 75 ? '#1a7a40' : avg >= 50 ? '#a05a00' : '#c0392b';
+  return `<span style="color:${color};font-weight:600">${avg}%</span>`;
+}
+
+function lastActiveCell(iso) {
+  const days = daysAgo(iso);
+  const text = relDate(iso);
+  if (days <= 1) return `<span style="color:#34c759;font-weight:600">${text}</span>`;
+  if (days <= 6) return `<span style="color:#ff9500">${text}</span>`;
+  return `<span style="color:#ff3b30">${text}</span>`;
+}
+
 async function load() {
   const pass = localStorage.getItem('nd_pass') || '';
   try {
@@ -231,9 +380,20 @@ async function load() {
     document.getElementById('login-overlay').style.display = 'none';
     DATA = await res.json();
     render();
-  } catch (e) {
+  } catch(e) {
     console.error(e);
   }
+}
+
+function enrichStudents(students) {
+  return students.map(s => ({
+    ...s,
+    status: studentStatus(s),
+    engScore: engagementScore(s),
+    kanjiPracticed: s.kanji.practiced,
+    kikuPassages: s.kiku.passages,
+    yomuPassages: s.yomu.passages,
+  }));
 }
 
 function render() {
@@ -241,72 +401,137 @@ function render() {
   const students = DATA.students;
   document.getElementById('updated').innerHTML = '<span class="dot"></span>Updated ' + new Date(DATA.updated_at).toLocaleTimeString();
 
+  allEnrichedStudents = enrichStudents(students);
+
   // Overview stats
+  const activeCount = allEnrichedStudents.filter(s => s.status === 'active').length;
+  const atRiskCount = allEnrichedStudents.filter(s => s.status === 'risk').length;
   document.getElementById('overviewStats').innerHTML = [
-    statCard('Total Users', o.total_users, 'across all apps', 'navy'),
-    statCard('Active (7d)', o.active_users_7d, Math.round(o.active_users_7d/Math.max(o.total_users,1)*100)+'% of total', 'green'),
+    statCard('Total Students', o.total_users, 'enrolled', 'navy'),
+    statCard('Active', activeCount, 'practiced in last 2 days', 'green'),
+    statCard('At Risk', atRiskCount, '3–6 days inactive', 'orange'),
     statCard('Kanji Practiced', o.total_kanji_practiced, 'SRS cards created', 'red'),
-    statCard('Kiku Passages', o.total_kiku_passages, 'listened', 'indigo'),
-    statCard('Yomu Passages', o.total_yomu_passages, 'read', 'teal'),
-    statCard('Vocab Mastered', o.total_vocab_mastered, 'cross-app', 'orange'),
+    statCard('Passages Heard', o.total_kiku_passages, 'listening sessions', 'indigo'),
+    statCard('Passages Read', o.total_yomu_passages, 'reading sessions', 'teal'),
   ].join('');
 
-  // Student roster — paginated
-  filteredStudents = students;
+  // Overview table (top 10 most recent)
+  document.getElementById('overviewTable').innerHTML = allEnrichedStudents.slice(0, 10).map(s => `<tr>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">${s.display_name || shortEmail(s.email)}</td>
+    <td>${statusBadge(s.status)}</td>
+    <td>${s.streak > 0 ? '🔥 ' + s.streak : '—'}</td>
+    <td>${s.kanji.practiced > 0 ? s.kanji.practiced + ' practiced, ' + s.kanji.mastered + ' mastered' : '—'}</td>
+    <td>${s.kiku.passages > 0 ? s.kiku.passages + ' passages' + (s.kiku.quiz_avg != null ? ' · ' + s.kiku.quiz_avg + '%' : '') : '—'}</td>
+    <td>${s.yomu.passages > 0 ? s.yomu.passages + ' passages' + (s.yomu.quiz_avg != null ? ' · ' + s.yomu.quiz_avg + '%' : '') : '—'}</td>
+    <td>${lastActiveCell(s.last_active)}</td>
+  </tr>`).join('') || '<tr><td colspan="7" class="empty">No student activity yet</td></tr>';
+
+  // Attention banner
+  const riskStudents = allEnrichedStudents.filter(s => s.status === 'risk' || s.status === 'inactive');
+  if (riskStudents.length > 0) {
+    document.getElementById('attentionBanner').innerHTML = `
+      <div class="attention-banner">
+        <div class="icon">⚠️</div>
+        <p>
+          <strong>${riskStudents.length} student${riskStudents.length > 1 ? 's' : ''} need${riskStudents.length === 1 ? 's' : ''} attention</strong>
+          ${riskStudents.map(s => (s.display_name || shortEmail(s.email)) + ' (' + relDate(s.last_active) + ')').join(' · ')}
+        </p>
+      </div>`;
+  } else {
+    document.getElementById('attentionBanner').innerHTML = '';
+  }
+
+  // Roster
+  filteredStudents = allEnrichedStudents;
   studentPage = 0;
-  renderStudentPage();
+  applyFilters();
+
   document.getElementById('studentSearch').oninput = function() {
-    const q = this.value.toLowerCase();
-    filteredStudents = students.filter(s => (s.email||'').toLowerCase().includes(q) || (s.display_name||'').toLowerCase().includes(q) || s.id.includes(q));
-    studentPage = 0;
-    renderStudentPage();
+    applyFilters();
   };
 
   // Kanji tab
-  const kanjiStudents = students.filter(s => s.kanji.practiced > 0);
+  const kanjiStudents = allEnrichedStudents.filter(s => s.kanji.practiced > 0);
+  const maxKanjiPracticed = Math.max(...kanjiStudents.map(s => s.kanji.practiced), 1);
   document.getElementById('kanjiStats').innerHTML = [
     statCard('Students', kanjiStudents.length, 'using Kanji Mentor', 'red'),
     statCard('Total Cards', o.total_kanji_practiced, 'SRS entries', 'red'),
-    statCard('Avg per Student', kanjiStudents.length ? Math.round(o.total_kanji_practiced/kanjiStudents.length) : 0, 'kanji', 'red'),
+    statCard('Avg Mastery', kanjiStudents.length ? Math.round(kanjiStudents.reduce((a,s)=>a+s.kanji.mastered,0)/kanjiStudents.length) : 0, 'kanji mastered / student', 'red'),
   ].join('');
-  document.getElementById('kanjiTable').innerHTML = kanjiStudents.map(s => `<tr>
-    <td>${shortEmail(s.email)}</td>
-    <td>${s.kanji.practiced}</td>
-    <td>${s.kanji.mastered}</td>
-    <td>${s.kanji.practiced > 0 ? Math.round(s.kanji.mastered/s.kanji.practiced*100)+'%' : '—'}</td>
-    <td>${relDate(s.last_active)}</td>
-  </tr>`).join('') || '<tr><td colspan="5" class="empty">No kanji practice yet</td></tr>';
+  document.getElementById('kanjiTable').innerHTML = kanjiStudents
+    .sort((a,b) => b.kanji.mastered - a.kanji.mastered)
+    .map(s => {
+      const pct = s.kanji.practiced > 0 ? Math.round(s.kanji.mastered/s.kanji.practiced*100) : 0;
+      return `<tr>
+        <td style="font-weight:500">${s.display_name || shortEmail(s.email)}</td>
+        <td>${s.kanji.practiced}</td>
+        <td>${s.kanji.mastered}</td>
+        <td>${pct}%</td>
+        <td>${miniBar(s.kanji.mastered, s.kanji.practiced, '#ff3b30')}</td>
+        <td>${lastActiveCell(s.last_active)}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" class="empty">No kanji practice yet</td></tr>';
 
   // Kiku tab
-  const kikuStudents = students.filter(s => s.kiku.passages > 0);
+  const kikuStudents = allEnrichedStudents.filter(s => s.kiku.passages > 0);
   document.getElementById('kikuStats').innerHTML = [
     statCard('Students', kikuStudents.length, 'using Kiku Mentor', 'indigo'),
     statCard('Passages Heard', o.total_kiku_passages, 'total', 'indigo'),
-    statCard('SRS Cards', students.reduce((a,s)=>a+s.kiku.srs_cards,0), 'listening vocab', 'indigo'),
+    statCard('Avg Comprehension', kikuStudents.length ? Math.round(kikuStudents.filter(s=>s.kiku.quiz_avg!=null).reduce((a,s)=>a+s.kiku.quiz_avg,0)/Math.max(kikuStudents.filter(s=>s.kiku.quiz_avg!=null).length,1)) + '%' : '—', 'quiz average', 'indigo'),
   ].join('');
-  document.getElementById('kikuTable').innerHTML = kikuStudents.map(s => `<tr>
-    <td>${shortEmail(s.email)}</td>
-    <td>${s.kiku.passages}</td>
-    <td>${s.kiku.quiz_avg != null ? s.kiku.quiz_avg+'%' : '—'}</td>
-    <td>${s.kiku.srs_cards}</td>
-    <td>${relDate(s.last_active)}</td>
-  </tr>`).join('') || '<tr><td colspan="5" class="empty">No listening activity yet</td></tr>';
+  document.getElementById('kikuTable').innerHTML = kikuStudents
+    .sort((a,b) => b.kiku.passages - a.kiku.passages)
+    .map(s => `<tr>
+      <td style="font-weight:500">${s.display_name || shortEmail(s.email)}</td>
+      <td>${s.kiku.passages}</td>
+      <td>${quizBadge(s.kiku.quiz_avg)}</td>
+      <td>${s.kiku.srs_cards}</td>
+      <td>${lastActiveCell(s.last_active)}</td>
+    </tr>`).join('') || '<tr><td colspan="5" class="empty">No listening activity yet</td></tr>';
 
   // Yomu tab
-  const yomuStudents = students.filter(s => s.yomu.passages > 0);
+  const yomuStudents = allEnrichedStudents.filter(s => s.yomu.passages > 0);
   document.getElementById('yomuStats').innerHTML = [
     statCard('Students', yomuStudents.length, 'using Yomu Mentor', 'teal'),
     statCard('Passages Read', o.total_yomu_passages, 'total', 'teal'),
-    statCard('Reading Time', students.reduce((a,s)=>a+s.yomu.reading_time_min,0)+'m', 'total', 'teal'),
+    statCard('Total Read Time', Math.round(allEnrichedStudents.reduce((a,s)=>a+s.yomu.reading_time_min,0)) + 'm', 'across all students', 'teal'),
   ].join('');
-  document.getElementById('yomuTable').innerHTML = yomuStudents.map(s => `<tr>
-    <td>${shortEmail(s.email)}</td>
-    <td>${s.yomu.passages}</td>
-    <td>${s.yomu.reading_time_min}m</td>
-    <td>${s.yomu.word_lookups}</td>
-    <td>${s.yomu.quiz_avg != null ? s.yomu.quiz_avg+'%' : '—'}</td>
-    <td>${s.yomu.srs_cards}</td>
-  </tr>`).join('') || '<tr><td colspan="6" class="empty">No reading activity yet</td></tr>';
+  document.getElementById('yomuTable').innerHTML = yomuStudents
+    .sort((a,b) => b.yomu.passages - a.yomu.passages)
+    .map(s => `<tr>
+      <td style="font-weight:500">${s.display_name || shortEmail(s.email)}</td>
+      <td>${s.yomu.passages}</td>
+      <td>${s.yomu.reading_time_min}m</td>
+      <td>${s.yomu.word_lookups}</td>
+      <td>${quizBadge(s.yomu.quiz_avg)}</td>
+      <td>${s.yomu.srs_cards}</td>
+    </tr>`).join('') || '<tr><td colspan="6" class="empty">No reading activity yet</td></tr>';
+}
+
+function applyFilters() {
+  const q = (document.getElementById('studentSearch')?.value || '').toLowerCase();
+  let base = allEnrichedStudents;
+  if (currentFilter !== 'all') base = base.filter(s => s.status === currentFilter);
+  if (q) base = base.filter(s => (s.email||'').toLowerCase().includes(q) || (s.display_name||'').toLowerCase().includes(q));
+
+  // Sort
+  base = [...base].sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (typeof av === 'string') av = av.toLowerCase(), bv = (bv||'').toLowerCase();
+    if (av == null) av = '';
+    if (bv == null) bv = '';
+    return sortAsc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+  });
+
+  filteredStudents = base;
+  studentPage = 0;
+  renderStudentPage();
+}
+
+function sortRoster(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = false; }
+  applyFilters();
 }
 
 function statCard(label, value, sub, color) {
@@ -315,41 +540,76 @@ function statCard(label, value, sub, color) {
 
 function renderStudentPage() {
   const total = filteredStudents.length;
-  const totalPages = Math.ceil(total / PAGE_SIZE);
   const start = studentPage * PAGE_SIZE;
   const page = filteredStudents.slice(start, start + PAGE_SIZE);
+  document.getElementById('rosterCount').textContent = total + ' students';
 
   const pager = document.getElementById('studentPager');
-  if (total === 0) {
-    pager.textContent = 'No results';
-  } else {
-    pager.textContent = `${start + 1}–${Math.min(start + PAGE_SIZE, total)} of ${total}`;
-  }
+  pager.textContent = total === 0 ? 'No results' : `${start + 1}–${Math.min(start + PAGE_SIZE, total)} of ${total}`;
 
-  document.getElementById('studentTable').innerHTML = page.map(s => `<tr>
-    <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.display_name || '—'}</td>
-    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shortEmail(s.email)}</td>
-    <td>
-      ${s.is_pro ? '<span class="badge badge-pro">Pro</span>' : '<span class="badge badge-free">Free</span>'}
-      ${s.provider === 'apple' ? ' <span class="badge badge-apple">Apple</span>' : ''}
-    </td>
-    <td>${s.streak > 0 ? '🔥 ' + s.streak : '—'}</td>
-    <td>${s.kanji.practiced > 0 ? s.kanji.practiced + ' / ' + s.kanji.mastered + '✓' : '—'}</td>
-    <td>${s.kiku.passages > 0 ? s.kiku.passages + (s.kiku.quiz_avg != null ? ' · ' + s.kiku.quiz_avg + '%' : '') : '—'}</td>
-    <td>${s.yomu.passages > 0 ? s.yomu.passages + (s.yomu.quiz_avg != null ? ' · ' + s.yomu.quiz_avg + '%' : '') : '—'}</td>
-    <td>${s.vocab_mastered > 0 ? s.vocab_mastered : '—'}</td>
-    <td>${relDate(s.joined)}</td>
-    <td>${relDate(s.last_active)}</td>
-  </tr>`).join('') || '<tr><td colspan="9" class="empty">No students found</td></tr>';
+  document.getElementById('studentTable').innerHTML = page.map(s => {
+    const rowClass = s.status === 'risk' ? ' class="at-risk"' : s.status === 'inactive' ? ' class="inactive"' : '';
+    const nameDisplay = s.display_name
+      ? `<span style="font-weight:600">${s.display_name}</span><br><span style="font-size:11px;color:#86868b">${shortEmail(s.email)}</span>`
+      : shortEmail(s.email);
+    return `<tr${rowClass}>
+      <td style="max-width:160px">${nameDisplay}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:#86868b">${s.is_pro ? '<span class="badge badge-pro" style="margin-right:4px">Pro</span>' : ''}${s.provider === 'apple' ? '<span class="badge badge-apple">Apple</span>' : ''}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td style="text-align:center">${engScoreRing(s.engScore)}</td>
+      <td>${s.streak > 0 ? '<span style="color:#ff9500;font-weight:600">🔥 ' + s.streak + '</span>' : '<span style="color:#c7c7cc">—</span>'}</td>
+      <td>
+        ${s.kanji.practiced > 0
+          ? `<span style="font-weight:600">${s.kanji.practiced}</span><span style="color:#86868b;font-size:11px"> · ${s.kanji.mastered} mastered</span>${miniBar(s.kanji.mastered, s.kanji.practiced, '#ff3b30')}`
+          : '<span style="color:#c7c7cc">—</span>'}
+      </td>
+      <td>
+        ${s.kiku.passages > 0
+          ? `<span style="font-weight:600">${s.kiku.passages}</span> passages ${s.kiku.quiz_avg != null ? '· ' + quizBadge(s.kiku.quiz_avg) : ''}`
+          : '<span style="color:#c7c7cc">—</span>'}
+      </td>
+      <td>
+        ${s.yomu.passages > 0
+          ? `<span style="font-weight:600">${s.yomu.passages}</span> passages ${s.yomu.quiz_avg != null ? '· ' + quizBadge(s.yomu.quiz_avg) : ''}`
+          : '<span style="color:#c7c7cc">—</span>'}
+      </td>
+      <td>${s.vocab_mastered > 0 ? '<span style="font-weight:600">' + s.vocab_mastered + '</span>' : '<span style="color:#c7c7cc">—</span>'}</td>
+      <td>${lastActiveCell(s.last_active)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="10" class="empty">No students match this filter</td></tr>';
 }
 
 function prevStudentPage() {
   if (studentPage > 0) { studentPage--; renderStudentPage(); }
 }
-
 function nextStudentPage() {
   const totalPages = Math.ceil(filteredStudents.length / PAGE_SIZE);
   if (studentPage < totalPages - 1) { studentPage++; renderStudentPage(); }
+}
+
+function exportCSV() {
+  const headers = ['Name','Email','Status','Engagement Score','Streak','Kanji Practiced','Kanji Mastered','Kiku Passages','Kiku Quiz Avg','Yomu Passages','Yomu Quiz Avg','Vocab Mastered','Joined','Last Active'];
+  const rows = allEnrichedStudents.map(s => [
+    s.display_name || '',
+    s.email || '',
+    s.status,
+    s.engScore,
+    s.streak,
+    s.kanji.practiced,
+    s.kanji.mastered,
+    s.kiku.passages,
+    s.kiku.quiz_avg != null ? s.kiku.quiz_avg + '%' : '',
+    s.yomu.passages,
+    s.yomu.quiz_avg != null ? s.yomu.quiz_avg + '%' : '',
+    s.vocab_mastered,
+    new Date(s.joined).toLocaleDateString(),
+    new Date(s.last_active).toLocaleDateString(),
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'nihongo-mentor-roster-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
 }
 
 showLogin();
