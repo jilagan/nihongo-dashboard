@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nihongo Mentor &mdash; Teacher Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f7; color: #1d1d1f; }
@@ -75,7 +76,7 @@
 
   /* Filter pills */
   .filter-pills { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
-  .pill { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; border:1.5px solid #e5e5ea; background:#fff; color:#86868b; transition:all .15s; }
+  .pill { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; border:1.5px solid #e5e5ea; background:#fff; color:#86868b; transition:all .15px; }
   .pill.active { border-color:#0f3460; background:#0f3460; color:#fff; }
 
   /* Attention panel */
@@ -86,7 +87,7 @@
 
   /* Login */
   #login-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:999; }
-  #login-box { background:#fff; border-radius:18px; padding:36px 32px 28px; width:360px; box-shadow:0 12px 40px rgba(0,0,0,.2); text-align:center; }
+  #login-box { background:#fff; border-radius:18px; padding:36px 32px 28px; width:380px; box-shadow:0 12px 40px rgba(0,0,0,.2); text-align:center; }
   #login-box h2 { font-size:18px; margin-bottom:4px; }
   #login-box p { font-size:12px; color:#86868b; margin-bottom:20px; }
   #login-box input { width:100%; padding:10px 14px; border:1px solid #e5e5ea; border-radius:8px; font-size:14px; margin-bottom:10px; outline:none; }
@@ -115,10 +116,15 @@
   <div id="login-box">
     <div style="font-size:40px;margin-bottom:8px;">🇯🇵</div>
     <h2>Nihongo Mentor</h2>
-    <p>Teacher Dashboard — enter credentials</p>
-    <input id="login-pass" type="password" placeholder="Password" autofocus>
-    <button id="login-btn">Sign In</button>
-    <div id="login-err">Invalid password. Try again.</div>
+    <p id="login-subtitle">Teacher Dashboard — sign in to continue</p>
+    <div id="auth-form">
+      <input id="login-email" type="email" placeholder="Email address">
+      <input id="login-pass" type="password" placeholder="Password">
+      <button id="login-btn">Sign In</button>
+      <div style="margin:12px 0;color:#86868b;font-size:11px;text-align:center;">or</div>
+      <button id="signup-btn" style="background:#f2f2f7;color:#1d1d1f;border:1px solid #e5e5ea;">Create Teacher Account</button>
+    </div>
+    <div id="login-err" style="color:#ff3b30;font-size:12px;margin-top:8px;display:none;"></div>
   </div>
 </div>
 
@@ -127,7 +133,7 @@
   <div class="logo">🇯🇵</div>
   <div>
     <h1>Nihongo Mentor</h1>
-    <p>Teacher Dashboard</p>
+    <p id="header-subtitle">Teacher Dashboard</p>
   </div>
   <div id="updated"><span class="dot"></span>Loading&hellip;</div>
 </header>
@@ -137,6 +143,7 @@
   <div class="tabs">
     <div class="tab active" data-tab="overview"><span class="emoji">📊</span>Overview</div>
     <div class="tab" data-tab="students"><span class="emoji">👥</span>Class Roster</div>
+    <div class="tab" data-tab="cohorts"><span class="emoji">🏫</span>Cohorts</div>
     <div class="tab" data-tab="kanji"><span class="emoji">✍️</span>Kanji</div>
     <div class="tab" data-tab="kiku"><span class="emoji">🎧</span>Kiku</div>
     <div class="tab" data-tab="yomu"><span class="emoji">📖</span>Yomu</div>
@@ -209,6 +216,45 @@
     </div>
   </div>
 
+  <!-- Cohorts Tab -->
+  <div class="tab-content" id="tab-cohorts">
+    <div class="card" id="cohort-create-card">
+      <h2>Create New Cohort</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div>
+          <div class="section-label">Cohort Name</div>
+          <input id="cohort-name" type="text" placeholder="e.g. JLPT N5 Spring 2026" style="padding:8px 12px;border:1px solid #e5e5ea;border-radius:8px;font-size:13px;width:220px;">
+        </div>
+        <div>
+          <div class="section-label">JLPT Target</div>
+          <select id="cohort-jlpt" style="padding:8px 12px;border:1px solid #e5e5ea;border-radius:8px;font-size:13px;">
+            <option value="">Any</option>
+            <option value="N5">N5</option>
+            <option value="N4">N4</option>
+            <option value="N3">N3</option>
+            <option value="N2">N2</option>
+            <option value="N1">N1</option>
+          </select>
+        </div>
+        <button class="btn btn-export" onclick="createCohort()">+ Create</button>
+      </div>
+    </div>
+    <div id="cohort-list"></div>
+
+    <!-- Invite modal -->
+    <div id="invite-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:999;">
+      <div style="background:#fff;border-radius:18px;padding:32px;width:400px;box-shadow:0 12px 40px rgba(0,0,0,.2);">
+        <h2 style="margin-bottom:8px;">Invite Link</h2>
+        <p style="font-size:12px;color:#86868b;margin-bottom:16px;">Share this with students. When they open it on their phone, they'll be enrolled automatically.</p>
+        <input id="invite-link-input" readonly style="width:100%;padding:10px;border:1px solid #e5e5ea;border-radius:8px;font-size:12px;font-family:monospace;">
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-export" onclick="copyInviteLink()" style="flex:1;">Copy Link</button>
+          <button class="btn" onclick="document.getElementById('invite-modal').style.display='none'" style="flex:1;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Kanji Tab -->
   <div class="tab-content" id="tab-kanji">
     <div class="stats-grid" id="kanjiStats"></div>
@@ -248,6 +294,10 @@
 
 <script>
 const API = 'https://fltusorahxjvsdjaspgy.supabase.co/functions/v1/nihongo-dashboard';
+const SUPABASE_URL = 'https://fltusorahxjvsdjaspgy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsdHVzb3JhaHhqdnNkamFzcGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNjQ4MzIsImV4cCI6MjA4ODY0MDgzMn0.XW5PMS9F3qsW4hrx6vdO6mev3RTvZALU5Zihn58zQKA'; // TODO: replace with anon key from Supabase dashboard
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 let DATA = null;
 const PAGE_SIZE = 20;
 let studentPage = 0;
@@ -256,6 +306,9 @@ let allEnrichedStudents = [];
 let currentFilter = 'all';
 let sortKey = 'last_active';
 let sortAsc = false;
+let currentSession = null;
+let currentTeacherProfile = null;
+let cohorts = [];
 
 // Tabs
 document.querySelectorAll('.tab').forEach(t => {
@@ -264,6 +317,7 @@ document.querySelectorAll('.tab').forEach(t => {
     document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     document.getElementById('tab-' + t.dataset.tab).classList.add('active');
+    if (t.dataset.tab === 'cohorts' && currentSession) loadCohorts();
   });
 });
 
@@ -277,17 +331,165 @@ document.querySelectorAll('.pill').forEach(p => {
   });
 });
 
-// Login
+// Auth
+async function initAuth() {
+  const { data: { session } } = await sbClient.auth.getSession();
+  if (session) {
+    currentSession = session;
+    await afterAuth(session);
+  } else {
+    showLogin();
+  }
+  sbClient.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      currentSession = session;
+      await afterAuth(session);
+    } else if (event === 'SIGNED_OUT') {
+      currentSession = null;
+      showLogin();
+    }
+  });
+}
+
+async function afterAuth(session) {
+  try {
+    const me = await apiFetch('/me', session.access_token);
+    if (me && me.needs_setup) {
+      window.location.href = 'setup.html';
+      return;
+    }
+    if (me && me.teacher_profile) {
+      currentTeacherProfile = me.teacher_profile;
+      document.getElementById('header-subtitle').textContent =
+        (currentTeacherProfile.display_name || 'Teacher') + ' · ' + (me.org?.name || 'Dashboard');
+    }
+  } catch(e) {
+    // /me endpoint may not exist yet — proceed anyway
+  }
+  document.getElementById('login-overlay').style.display = 'none';
+  addSignOutButton();
+  load(session.access_token);
+}
+
+async function apiFetch(path, token, options = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const r = await fetch(API + path, { ...options, headers });
+  return r.json();
+}
+
 function showLogin() {
   document.getElementById('login-overlay').style.display = 'flex';
-  const inp = document.getElementById('login-pass');
-  const btn = document.getElementById('login-btn');
-  const newBtn = btn.cloneNode(true);
-  btn.parentNode.replaceChild(newBtn, btn);
-  newBtn.addEventListener('click', () => { localStorage.setItem('nd_pass', inp.value); load(); });
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') newBtn.click(); });
-  const saved = localStorage.getItem('nd_pass');
-  if (saved) { inp.value = saved; newBtn.click(); }
+}
+
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  const { error } = await sbClient.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    errEl.textContent = error.message;
+    errEl.style.display = 'block';
+  }
+});
+
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+
+document.getElementById('signup-btn').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  if (!email || !pass) {
+    errEl.textContent = 'Enter email and password first.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const { error } = await sbClient.auth.signUp({ email, password: pass });
+  if (error) {
+    errEl.textContent = error.message;
+    errEl.style.display = 'block';
+  } else {
+    document.getElementById('login-subtitle').textContent = 'Check your email for a confirmation link.';
+    document.getElementById('auth-form').style.display = 'none';
+  }
+});
+
+function addSignOutButton() {
+  // Avoid adding duplicate
+  if (document.getElementById('signout-btn')) return;
+  const header = document.querySelector('header');
+  const btn = document.createElement('button');
+  btn.id = 'signout-btn';
+  btn.textContent = 'Sign Out';
+  btn.style.cssText = 'margin-left:auto;padding:6px 14px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;cursor:pointer;font-size:12px;';
+  btn.addEventListener('click', () => sbClient.auth.signOut());
+  const old = document.getElementById('updated');
+  header.insertBefore(btn, old);
+}
+
+// Cohorts
+async function loadCohorts() {
+  if (!currentSession) return;
+  try {
+    const data = await apiFetch('/cohorts', currentSession.access_token);
+    cohorts = data.cohorts || [];
+    renderCohorts();
+  } catch(e) {
+    document.getElementById('cohort-list').innerHTML = '<div class="card empty">Could not load cohorts.</div>';
+  }
+}
+
+async function createCohort() {
+  const name = document.getElementById('cohort-name').value.trim();
+  const jlpt = document.getElementById('cohort-jlpt').value;
+  if (!name) return;
+  await apiFetch('/cohorts', currentSession.access_token, {
+    method: 'POST',
+    body: JSON.stringify({ name, jlpt_target: jlpt || null })
+  });
+  document.getElementById('cohort-name').value = '';
+  loadCohorts();
+}
+
+async function generateInvite(cohortId, cohortName) {
+  try {
+    const data = await apiFetch('/invite', currentSession.access_token, {
+      method: 'POST',
+      body: JSON.stringify({ cohort_id: cohortId, label: cohortName })
+    });
+    document.getElementById('invite-link-input').value = data.invite_url || '';
+    document.getElementById('invite-modal').style.display = 'flex';
+  } catch(e) {
+    alert('Could not generate invite link.');
+  }
+}
+
+function copyInviteLink() {
+  const input = document.getElementById('invite-link-input');
+  navigator.clipboard.writeText(input.value);
+}
+
+function renderCohorts() {
+  const el = document.getElementById('cohort-list');
+  if (!cohorts.length) {
+    el.innerHTML = '<div class="card empty">No cohorts yet. Create one above.</div>';
+    return;
+  }
+  el.innerHTML = cohorts.map(c => `
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:600;">${c.name}</div>
+          <div style="font-size:12px;color:#86868b;margin-top:2px;">${c.jlpt_target ? 'Target: ' + c.jlpt_target : 'All levels'} · ${c.student_count || 0} students</div>
+        </div>
+        <button class="btn btn-export" onclick="generateInvite('${c.id}','${c.name.replace(/'/g,"\\'")}')">🔗 Invite Link</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 function shortEmail(e) {
@@ -332,8 +534,6 @@ function statusBadge(status) {
   return `<span class="badge ${cls}">${label}</span>`;
 }
 
-// Engagement score: 0–100 composite
-// Streak (max 30pts) + kanji mastered (max 20pts) + kiku passages*comprehension (max 25pts) + yomu passages*comprehension (max 25pts)
 function engagementScore(s) {
   const streakPts  = Math.min(s.streak, 14) / 14 * 30;
   const kanjiPts   = Math.min(s.kanji.mastered, 30) / 30 * 20;
@@ -359,7 +559,6 @@ function miniBar(value, max, color) {
 
 function countryFlag(code) {
   if (!code) return '<span style="color:#c7c7cc">—</span>';
-  // Convert ISO 3166-1 alpha-2 to flag emoji via regional indicator symbols
   const flag = [...code.toUpperCase()].map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('');
   return `<span title="${code}">${flag} ${code}</span>`;
 }
@@ -384,17 +583,15 @@ function lastActiveCell(iso) {
   return `<span style="color:#ff3b30">${text}</span>`;
 }
 
-async function load() {
-  const pass = localStorage.getItem('nd_pass') || '';
+async function load(token) {
   try {
-    const res = await fetch(API, { headers: { 'x-dashboard-password': pass } });
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(API, { headers });
     if (res.status === 401) {
-      document.getElementById('login-err').style.display = 'block';
-      localStorage.removeItem('nd_pass');
       showLogin();
       return;
     }
-    document.getElementById('login-overlay').style.display = 'none';
     DATA = await res.json();
     render();
   } catch(e) {
@@ -635,7 +832,7 @@ function exportCSV() {
   a.click();
 }
 
-showLogin();
+initAuth();
 </script>
 </body>
 </html>
